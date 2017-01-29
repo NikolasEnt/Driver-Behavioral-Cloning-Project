@@ -34,7 +34,7 @@ train_img_left_paths=col[1]
 train_img_right_paths=col[2]
 y_train=[]
 for i in col[3]:
-	y_train.append(float(i))
+	y_train.append(float(i)) #Convert steering angles into float
 
 #Batch generator of augmented images for training
 def generator_train(batch_size = 256): 
@@ -47,7 +47,7 @@ def generator_train(batch_size = 256):
 			if ind2<0:
 				ind2 = 0
 			y = y_train[ind]
-			cam = np.random.randint(3) #Camera from the frame
+			cam = np.random.randint(3) #Camera choose from the frame
 			if cam==1:
 				img_p = train_img_left_paths[ind]
 				img_p2 = train_img_left_paths[ind2]
@@ -98,6 +98,7 @@ def saver(model_file, weight_file):
 		json.dump(model.to_json(), f)
 	model.save_weights(weight_file)
 	print("Model saved", model_file, weight_file)
+
 #Model difinition
 model = Sequential()
 model.add(Lambda(lambda x: x/255.0-0.5, input_shape=(IMG_PROC_Y, IMG_PROC_X, 6))) #64x128x6
@@ -116,7 +117,7 @@ model.add(Dense(1))
 #Model summary and plot output
 model.summary()
 plot(model, to_file='model.png', show_shapes=True)
-#Model compilation and training
+#Model compilation, training and saving
 model.compile('Adam', loss='mean_squared_error')
 model.fit_generator(generator_train(), samples_per_epoch=32768, nb_epoch=6, validation_data=generator_val(), nb_val_samples=4096)
 saver("model.json", "model.h5")

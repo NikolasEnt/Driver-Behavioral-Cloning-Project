@@ -17,7 +17,6 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 # Fix error with Keras and TensorFlow
 import tensorflow as tf
 tf.python.control_flow_ops = tf
-
 from img_tools import *
 
 sio = socketio.Server()
@@ -47,9 +46,9 @@ def telemetry(sid, data):
 	imgString = data["image"]
 	image = Image.open(BytesIO(base64.b64decode(imgString)))
 	image_array = np.asarray(image)
-	if i%3==0: #Use only every 5th frame for predictions
+	if i%3==0: #Use only every 3th frame for predictions
 		b,g,r = cv2.split(image_array)
-		image_array = cv2.merge((r,g,b))
+		image_array = cv2.merge((r,g,b)) #Rearrange color channels
 		image_array = pred_img(image_array, IMG_PROC_X, IMG_PROC_Y)
 		if i<1:
 			img_conc=np.concatenate((image_array, image_array), axis=2)
@@ -91,4 +90,3 @@ if __name__ == '__main__':
 	app = socketio.Middleware(sio, app)
 	# deploy as an eventlet WSGI server
 	eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
-
