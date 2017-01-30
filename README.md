@@ -29,7 +29,7 @@ To evaluate performance of the model, run predictions while the Simulator is in 
 `python drive.py model.json`
 
 ## Architecture and Approach
-Driving is a dynamic process. That is why, from my point of view, it is very important to take into account not only current view from windshield, but also local motion direction and speed. In order to have such information, the ANN use two images: current and a previous image, shifted back in time on a constant value. For the training the previous image was 5 frames behind the current one. Current and previous images were concatenated along the color axis (so, input was XxYx6). Generally speaking, the "Early Fusion" approach was realized. The approach was inspired by a paper [1].
+Driving is a dynamic process. That is why, from my point of view, it is very important to take into account not only current view from a windshield, but also local motion direction and speed. In order to have such information, the ANN may use two images: current and a previous image, shifted back in time on a constant value. For the training the previous image was 5 frames behind the current one. Current and previous images were concatenated along the color axis (so, input was XxYx6). Generally speaking, the "Early Fusion" approach was realized. The approach was inspired by a paper [1].
 
 It was shown, that such problem could be solved by Convolutional Neural Networks (CNN) [2], so, convolutional architecture was used. The final architecture, which is the result of try and error process, consists of 4 convolutional layers followed by 2 fully connected layers. It was advised [1] to use bigger convolutional kernel  on the first convolutional layer for such CNNs. In the case kernel 7x7 was applied. The second convolutional layer involved (2,2) stride to reduce number of elements. For the same purpose two max pooling layers were used as well. Dropout layers were added to prevent overfitting. ReLU was used as activation. Architecture with details on output sizes of each layers is depicted on the figure below. 
 
@@ -54,18 +54,18 @@ In fact, only augmented images were involved in training. Generators were used t
 For validation and online prediction images were preprocessed, cropped and scaled in the same way.
 
 ## Model training
-The model was trained with Adam optimizer. The whole training process were for 6 epochs, 32768 images in each. Training dataset was organized in minibatches of 256 pairs of images each. Number of epochs was selected by experiments and correspond to the minimum of the validation loss.
+The model was trained with Adam optimizer. The whole training process took 6 epochs, 32768 images in each. Training dataset was organized in minibatches of 256 pairs of images each. Number of epochs was selected by experiments and correspond to the minimum of the validation loss.
 
 ## Results and discussion
 Two concatenated images were used for prediction as well: the current and the previous one (from memory). Time shift was different from one, used for training. It may be explained by the fact that during training data collecting human used different point of view and has different angle of view (see screenshot below and compare with raw training image above). It may resulted in different necessary reaction time on different driving  situations, that is why optimal time shifts between images in a pair in case of training and actual prediction may be different.
 
 ![Simulator screenshot](/images/screen.png)
 
-It was found out that optimal time difference between current and previous frames is 3 (instead of 5 during training). Predictions were produced not on every available frame, but using only every 3rd frame, because, as it was observed from the training drive log, human driver unable to update stearing angle so fast and, consequently, it is useless to spend extra computational power on it.
+It was found out by experiments that optimal time difference between current and previous frames is 3 (instead of 5 during training). Predictions were produced not on every available frame, but using only every 3rd frame, because, as it was observed from the training drive log, human driver unable to update stearing angle so fast and, consequently, it is useless to spend extra computational power on it.
 
 The model is quite sensitive to input data, so, the training dataset should be constructed wisely. 
 
-The final model is able to drive around the training track and mimic desired driving pattern to some extend. Unfortunately, it is impossible to ride on the second (challenge track) because the used driving style uses whole road width, but there a lot of streetlights on the road sides. So, further tuning is needed to pass the second track.
+The final model is able to drive around the training track and mimic desired driving pattern to some extend. Unfortunately, it is impossible to ride on the second (challenge track) because the used driving style uses whole road width, but there are a lot of streetlights on the road sides. So, further tuning is needed to pass the second track.
 
 ## References:
 [1]: Andrej Karpathy, George Toderici, Sanketh Shetty, Thomas Leung, Rahul Sukthankar, Li Fei-Fei. Large-scale Video Classification with Convolutional Neural Networks // Computer Vision and Pattern Recognition (CVPR), 2014 IEEE Conference. DOI: [10.1109/CVPR.2014.223](https://doi.org/10.1109/CVPR.2014.223)
